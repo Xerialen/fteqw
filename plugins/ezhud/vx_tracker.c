@@ -177,19 +177,29 @@ static const char *VXTracker_PlayerName(int idx)
 	return cl.players[idx].name[0] ? cl.players[idx].name : "player";
 }
 
-// STUB: ezQuake resolves a weapon abbreviation/icon per weapon id from its own
-// weapon table (vx_tracker.c weapon_images[]/weapon_labels[]). The engine
-// bridge only forwards a numeric weapon id (matches engine's internal weapon
-// index from fragfile.dat, see fragstats.c wt_s.abrev) and does not currently
-// expose the abrev/name string to plugins, so this is trimmed to a plain
-// numeric fallback. cl_useimagesinfraglog therefore has nothing to load yet -
-// it degrades to the same text path, which satisfies the "graceful fallback"
-// requirement but not the "shows icons" one.
+// ezhud #15 P2 FIX3: resolves a weapon abbreviation/icon per weapon id via the
+// new engine plugin API GetFragWeaponToken (engine/common/plugin.c ->
+// engine/client/fragstats.c's Stats_GetWeaponToken), which returns the SAME
+// token the engine's own built-in tracker draws for that weapon: either the
+// fragfile.dat-loaded tracker-charset image-glyph string (a plain string,
+// drawable inline through the normal StringH/String path used for the rest of
+// the row - no separate pic-draw call needed here) or its text abbreviation.
+// cl_useimagesinfraglog only affects the FIRST of those two outcomes: when
+// off, we always use the plain-text fallback path (skip asking the engine for
+// the image token at all); when on, we ask for it but still fall back to the
+// numeric placeholder if the engine returns nothing (unknown wid), which is
+// the "falls back to text when unavailable" requirement.
 static const char *VXTracker_WeaponAbrev(int wid, char *buf, size_t bufsize)
 {
-	if (cl_useimagesinfraglog->ival)
+	if (cl_useimagesinfraglog->ival && drawfuncs)
 	{
-		// no image source wired up yet - fall through to text.
+		char token[32];
+		drawfuncs->GetFragWeaponToken(wid, token, sizeof(token));
+		if (token[0])
+		{
+			Q_snprintfz(buf, bufsize, "%s", token);
+			return buf;
+		}
 	}
 	Q_snprintfz(buf, bufsize, "wpn%i", wid);
 	return buf;

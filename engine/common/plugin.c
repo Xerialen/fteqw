@@ -2136,6 +2136,8 @@ static void *QDECL PlugBI_GetEngineInterface(const char *interfacename, size_t s
 
 			Plug_LocalSound,
 
+			Plug_Draw_GetFragWeaponToken,
+
 			{
 				R_ShaderGetCinematic,
 #ifdef HAVE_MEDIA_DECODER

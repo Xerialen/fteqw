@@ -202,6 +202,29 @@ qboolean Stats_TrackerImageLoaded(const char *in)
 		return Font_TrackerValid(unicode_decode(&error, in, &in, true));
 	return false;
 }
+
+// ezhud #15 P2 FIX3: lets a plugin (plugins/ezhud/vx_tracker.c) resolve a
+// FragEvent's numeric weaponid to the same token Stats_FragMessage() (this
+// file, above) already draws for the engine's OWN built-in tracker: the
+// tracker-charset image-glyph string when fragfile.dat loaded one (drawn
+// inline by the normal StringH/Font_Decode path - no separate pic draw call
+// needed by the caller), falling back to the plain text abbreviation
+// otherwise. wid out of range or unknown yields an empty outbuf, which the
+// plugin treats as "no token, fall back to its own numeric placeholder".
+void Stats_GetWeaponToken(int wid, char *outbuf, size_t outsize)
+{
+	struct wt_s *w;
+	if (!outbuf || !outsize)
+		return;
+	*outbuf = 0;
+	if (wid < 0 || wid >= MAX_WEAPONS)
+		return;
+	w = &fragstats.weapontotals[wid];
+	if (Stats_TrackerImageLoaded(w->image))
+		Q_strncpyz(outbuf, w->image, outsize);
+	else if (w->abrev)
+		Q_strncpyz(outbuf, w->abrev, outsize);
+}
 static char *Stats_GenTrackerImageString(char *in)
 {	//images are of the form "foo \sg\ bar \q\"
 	//which should eg be remapped to: "foo ^Ue200 bar foo ^Ue201"
