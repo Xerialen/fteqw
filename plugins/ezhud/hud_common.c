@@ -7991,6 +7991,16 @@ void CommonDraw_Init(void)
 	HUD_InitSbarImages();
 
 	// variables
+	// scr_newhud: 0=classic sbar only, 1=ezhud only (default), 2=both.
+	// Registering it here (same mechanism as the other ezhud cvars below)
+	// makes it a real, settable cvar: the editor's boot arg
+	// (+set scr_newhud 1) and later `set scr_newhud X` writes now hit
+	// this cvar instead of a no-op, and EZHud_Draw() (ezquakeisms.c)
+	// reads it each frame to decide whether to run HUD_Draw() and/or
+	// let the engine also draw the classic sbar (engine/common/plugin.c
+	// ~line 1483: `if (!(ret & 1)) ... Sbar_Draw(pv);` after the plugin's
+	// SbarBase callback returns).
+	scr_newHud			= cvarfuncs->GetNVFDG("scr_newhud", "1", 0, NULL, "ezhud");
 	hud_planmode		= cvarfuncs->GetNVFDG("hud_planmode", "0", 0, NULL, "ezhud");
 	hud_tp_need			= cvarfuncs->GetNVFDG("hud_tp_need", "0", 0, NULL, "ezhud");
 	hud_digits_trim		= cvarfuncs->GetNVFDG("hud_digits_trim", "1", 0, NULL, "ezhud");
