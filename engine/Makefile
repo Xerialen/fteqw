@@ -2505,7 +2505,11 @@ libs-$(ARCH)/libjpeg.a:
 	test -f libs-$(ARCH)/libjpeg.a || (mkdir -p libs-$(ARCH) && cd libs-$(ARCH) && tar -xvzf ../jpegsrc.v$(JPEGVER).tar.gz && cd jpeg-$(JPEGVER) && $(CONFIGUREOVERRIDES) ./configure $(CONFIGARGS) && $(TOOLOVERRIDES) $(MAKE) && cp .libs/libjpeg.a ../ && $(TOOLOVERRIDES) $(AR) -s ../libjpeg.a && cp jconfig.h jerror.h jmorecfg.h jpeglib.h jversion.h ../ )
 
 libs-$(ARCH)/libz.a libs-$(ARCH)/libz.pc:
-	test -f zlib-$(ZLIBVER).tar.gz || wget http://zlib.net/fossils/zlib-$(ZLIBVER).tar.gz
+	# zlib.net serves a 12kb error page over plain http these days; fetch over
+	# https with a github-mirror fallback, and integrity-check so a bad download
+	# fails HERE with a refetch on retry, not later inside tar (ezHUD #15).
+	test -f zlib-$(ZLIBVER).tar.gz || wget -q https://zlib.net/fossils/zlib-$(ZLIBVER).tar.gz || wget -q https://github.com/madler/zlib/releases/download/v$(ZLIBVER)/zlib-$(ZLIBVER).tar.gz
+	gzip -t zlib-$(ZLIBVER).tar.gz || { rm -f zlib-$(ZLIBVER).tar.gz; echo "zlib tarball corrupt; deleted for refetch" >&2; false; }
 	test -f libs-$(ARCH)/libz.a || (mkdir -p libs-$(ARCH) && cd libs-$(ARCH) && tar -xvzf ../zlib-$(ZLIBVER).tar.gz && cd zlib-$(ZLIBVER) && $(TOOLCONFIGUREOVERRIDES) ./configure --static && $(TOOLMAKEOVERRIDES) $(MAKE) libz.a CC="$(CC) $(W32_CFLAGS) -fPIC" && cp libz.a ../ && $(TOOLOVERRIDES) $(AR) -s ../libz.a && cp zlib.h zconf.h zutil.h zlib.pc ../ )
 libs-$(ARCH)/libz9.a: libs-$(ARCH)/libz.a
 	(cd libs-$(ARCH)/zlib-$(ZLIBVER) && \
