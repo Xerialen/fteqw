@@ -334,6 +334,12 @@ void Stats_Evaluate(fragfilemsgtypes_t mt, int wid, int p1, int p2)
 		p2 = tmp;
 	}
 
+	//forwarded AFTER the ff_frags/ff_tkills swap above, so a plugin always sees
+	//the same "p1 died, p2 killed" convention this function's own switch uses
+	//for every two-componant type (ff_frags/ff_fragedby/ff_tkills/ff_tkilledby) -
+	//forwarding pre-swap would hand ff_frags events reversed victim/attacker.
+	Plug_FragEvent((int)mt, wid, p1, p2, 0);	//forward frag/death/etc event to any registered plugin (e.g. ezhud killfeed tracker)
+
 	u1 = (p1 == (cl.playerview[0].playernum));
 	u2 = (p2 == (cl.playerview[0].playernum));
 

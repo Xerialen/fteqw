@@ -1103,7 +1103,8 @@ ifeq (1,$(LINK_EZHUD))
 		ezquakeisms.o	\
 		hud.o			\
 		hud_common.o	\
-		hud_editor.o
+		hud_editor.o	\
+		vx_tracker.o
 endif
 ifeq (1,$(LINK_OPENSSL))
     ifeq (1,$(shell $(PKGCONFIG) --atleast-version 3 openssl && echo 1))	#must exist... and if its not openssl3 then its not gpl3-compatible so refuse to use it.
