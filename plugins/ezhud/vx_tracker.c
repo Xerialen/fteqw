@@ -353,9 +353,15 @@ void SCR_HUD_DrawTracker(hud_t *hud)
 		return;
 	}
 
-	rowheight = 8 * hud_tracker_scale->value;
-	width = 40 * 8 * hud_tracker_scale->value;
-	height = (int)(r_tracker_messages->ival * rowheight);
+	// ezhud #15 P2 FIX4: clamp both inputs to the rect size so a stray cvar
+	// value (hud_tracker_scale set to 0, or r_tracker_messages set to 0 by a
+	// config/typo) can't collapse this element to a permanent 0x0 rect - HUD
+	// elements have no general "recompute on next value that makes sense"
+	// path, so a single bad frame here would otherwise stick until reload.
+	// Always sized off these two cvars (never hardcoded), same as before.
+	rowheight = 8 * bound(0.1f, hud_tracker_scale->value, 10.0f);
+	width = 40 * 8 * bound(0.1f, hud_tracker_scale->value, 10.0f);
+	height = (int)(max(1, r_tracker_messages->ival) * rowheight);
 
 	if (!HUD_PrepareDraw(hud, width, height, &x, &y))
 		return;
