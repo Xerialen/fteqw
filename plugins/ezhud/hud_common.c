@@ -578,16 +578,10 @@ void SCR_HUD_DrawTracking(hud_t *hud)
 	height *= hud_tracking_scale->value;
 	width *= hud_tracking_scale->value;
 
-	if (!(cl.spectator && autocam == CAM_TRACK))
-		return;
-
 	if(!HUD_PrepareDraw(hud, width, height, &x, &y))
 	{
 		return;
 	}
-
-	if (height == 0)
-		return;
 
 #ifdef HAXX
 	if (cls.mvdplayback && cl_multiview->value && autocam == CAM_TRACK)
@@ -1079,10 +1073,10 @@ static void SCR_HUD_DrawNetStats(hud_t *hud)
     width = 16*8 ;
     height = 12 + 8 + 8 + 8 + 8 + 16 + 8 + 8 + 8 + 8 + 16 + 8 + 8 + 8;
 
-	if (!netinfo || netinfo->capturing==2)
-		return;
 	if (HUD_PrepareDraw(hud, width, height, &x, &y))
 	{
+		if (!netinfo || netinfo->capturing==2)
+			return;
         SCR_NetStats(x, y, hud_net_period->value, netinfo);
 	}
 }
