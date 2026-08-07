@@ -579,7 +579,7 @@ void SCR_HUD_DrawTracking(hud_t *hud)
 	width *= hud_tracking_scale->value;
 
 	if (!(cl.spectator && autocam == CAM_TRACK))
-		height = 0;
+		return;
 
 	if(!HUD_PrepareDraw(hud, width, height, &x, &y))
 	{
@@ -1080,8 +1080,8 @@ static void SCR_HUD_DrawNetStats(hud_t *hud)
     height = 12 + 8 + 8 + 8 + 8 + 16 + 8 + 8 + 8 + 8 + 16 + 8 + 8 + 8;
 
 	if (!netinfo || netinfo->capturing==2)
-		HUD_PrepareDraw(hud, 0, 0, &x, &y);
-	else if (HUD_PrepareDraw(hud, width, height, &x, &y))
+		return;
+	if (HUD_PrepareDraw(hud, width, height, &x, &y))
 	{
         SCR_NetStats(x, y, hud_net_period->value, netinfo);
 	}
@@ -6664,7 +6664,6 @@ void SCR_HUD_DrawOwnFrags(hud_t *hud)
 
 	if (!width)
 	{
-		HUD_PrepareDraw(hud, width, height, NULL, NULL);
 		return;
 	}
 	if (!HUD_PrepareDraw(hud, width, height, &x, &y))
