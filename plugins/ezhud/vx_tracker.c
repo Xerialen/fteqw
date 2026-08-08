@@ -349,7 +349,6 @@ void SCR_HUD_DrawTracker(hud_t *hud)
 
 	if (!r_tracker->ival)
 	{
-		HUD_PrepareDraw(hud, 0, 0, NULL, NULL);
 		return;
 	}
 
